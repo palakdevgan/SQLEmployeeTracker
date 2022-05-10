@@ -2,6 +2,7 @@ const inquirer =require('inquirer');
 const CompanyDb = require('./lib/CompanyDb');
 const db=new CompanyDb();
 
+
 const showMenu = () =>{
     return inquirer.prompt({
         type:'list',
@@ -37,6 +38,7 @@ const addDepartment = () =>{
 };
 
 const addRole = () =>{
+    var myArray = db.getDepartments();
     return inquirer.prompt([
     {
       type:'input',
@@ -83,14 +85,14 @@ const addRole = () =>{
         type:'list',
         message: 'What would you like to do?',
         name:'action',
-        choices:db.getDepartments()
+        choices:myArray
     }
 ])
   };
 
 showMenu().then(({action}) =>{
     if(action === 'View all Departments'){
-    return db.getDepartments();
+    console.log(db.getDepartments());
     }
     else if(action === 'View all Roles'){
     return db.getRoles();
