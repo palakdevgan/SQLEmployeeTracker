@@ -1,14 +1,72 @@
 const inquirer = require('inquirer');
-const CompanyDb = require('./lib/CompanyDb');
-const db = new CompanyDb();
+const db = require('./lib/CompanyDb');
+
 
 const showMenu = () => {
-    return inquirer.prompt({
+    inquirer.prompt({
         type: 'list',
         message: 'What would you like to do?',
         name: 'action',
-        choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update an Employee Role']
-    })
+        choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update an Employee Role','Exit'],
+        pageSize:8
+    }).then(({ action }) => {
+        if (action === 'View all Departments') {
+            db.getDepartments().then( ([rows,fields]) => {
+                //console.log('\n');
+                console.table(rows);
+                showMenu();
+                //index.showMenu();
+              })
+              .catch(console.log);
+            
+        }
+       else if (action === 'View all Roles') {
+            db.getRoles().then( ([rows,fields]) => {
+                //console.log('\n');
+                console.table(rows);
+                showMenu();
+              })
+              .catch((err) => {
+                  console.log(err);
+              });
+            //showMenu();
+        }
+        else if (action === 'View all Employees') {
+            db.getEmployees().then( ([rows,fields]) => {
+                //console.log('\n');
+                console.table(rows);
+                showMenu();
+              })
+              .catch(console.log);
+            //showMenu();
+        }
+        else if (action === 'Add a Department') {
+            addDepartment().then(answers => {
+                db.addDepartment(answers.deptName).then( ([rows,fields]) => {
+                    //console.table(rows);
+                    console.log(`\nAdded ${answers.deptName} to the database`);
+                    showMenu();
+                  })
+                  .catch(console.log);;
+            })
+            //showMenu();
+        }
+        else if (action === 'Add a Role') {
+            addRole().then((answers) => {
+                db.addRole(answers.roleTitle,Number(answers.roleSalary),Number(answers.action)).then( ([rows,fields]) => {
+                    //console.table(rows);
+                    console.log(`\nAdded ${title},${salary},${department_id} to the database`);
+                    showMenu();
+                  })
+                  .catch(console.log);
+            })
+            //showMenu();
+        }
+        else if (action === 'Exit') {
+           db.endCon();
+           process.exit(1);
+        }
+    });
 
 };
 
@@ -35,7 +93,7 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
-    db.returnDepartments().then(([rows]) => {
+    db.getDepartments().then(([rows]) => {
         let departments = rows;
         const departmentChoices = departments.map(({ id, DeptName }) => ({
             name: DeptName,
@@ -86,34 +144,10 @@ const addRole = () => {
                 name: 'action',
                 choices: departmentChoices
             }
-        ]).then((answers) => {
-            console.log(answers.roleTitle,answers.roleSalary,answers.action);
-            db.addRole(answers.roleTitle,Number(answers.roleSalary),Number(answers.action));
-        });
+        ])
     })
     };
 
-    showMenu().then(({ action }) => {
-        if (action === 'View all Departments') {
-            db.getDepartments();
-            showMenu();
-        }
-        else if (action === 'View all Roles') {
-            db.getRoles();
-            //showMenu();
-        }
-        else if (action === 'View all Employees') {
-            db.getEmployees();
-            //showMenu();
-        }
-        else if (action === 'Add a Department') {
-            addDepartment().then(answers => {
-                db.addDepartment(answers.deptName);
-            })
-            //showMenu();
-        }
-        else if (action === 'Add a Role') {
-            addRole();
-            //showMenu();
-        }
-    });
+    showMenu();
+
+//exports.showMenu=showMenu;
